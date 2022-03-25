@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "999310075232",
+    "firebase_url": "https://notetes-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "notetes",
+    "storage_bucket": "notetes.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:999310075232:android:49b1cea294c2276d9d6a05",
+        "android_client_info": {
+          "package_name": "com.notetes"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "999310075232-6c8cfhud989tui8p7e71lpiqn5u4n99m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCAGn--eYgQIkcZt_SJAUlXoWLL7phvjhM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "999310075232-6c8cfhud989tui8p7e71lpiqn5u4n99m.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
