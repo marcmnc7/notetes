@@ -6,8 +6,10 @@ import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.PictureDrawable;
+import android.util.Base64;
 import android.widget.RemoteViews;
 import android.content.SharedPreferences;
 
@@ -30,20 +32,16 @@ public class NotetesWidget extends AppWidgetProvider {
 
             SharedPreferences sharedPref = context.getSharedPreferences("DATA", Context.MODE_PRIVATE);
 
-            String appString = sharedPref.getString("appData", "{\"svg\":'<svg width=\"100\" height=\"100\"><circle cx=\"50\" cy=\"50\" r=\"40\" stroke=\"green\" stroke-width=\"4\" fill=\"yellow\" /></svg>'}");
+            String appString = sharedPref.getString("appData", "R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=");
             JSONObject appData = new JSONObject(appString);
 
-            SVG svg = SVG.getFromString(appData.getString("svg"));
-            PictureDrawable pd = new PictureDrawable(svg.renderToPicture());
-            Bitmap bitmap = Bitmap.createBitmap(400, 400, Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bitmap);
-            pd.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
-            pd.draw(canvas);
+            byte[] decodedString = Base64.decode(appData.getString("svgInBase64"), Base64.DEFAULT);
+            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.notetes_widget);
             views.setOnClickPendingIntent(R.id.imageView3, pendingIntent);
-            views.setImageViewBitmap(R.id.imageView3, bitmap);
+            views.setImageViewBitmap(R.id.imageView3, decodedByte);
             appWidgetManager.updateAppWidget(appWidgetId, views);
-        }catch (SVGParseException | JSONException e) {
+        }catch (JSONException e) {
             e.printStackTrace();
         }
     }
