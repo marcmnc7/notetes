@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useRef, useState, useEffect} from 'react';
+import React, {useRef, useState, useEffect, useContext } from 'react';
 import {
   Animated,
   StyleSheet,
@@ -26,21 +26,26 @@ import {
 } from '@benjeau/react-native-draw-extras';
 import ViewShot from 'react-native-view-shot';
 import {SvgXml} from 'react-native-svg';
+import { UserContext } from './context'
 var RNFS = require('react-native-fs');
 
 export default () => {
-  const canvasRef = useRef();
   let navigate = useNavigate();
+  const { mobileData, _ } = useContext(UserContext)
+  
   const [actualDraw, setActualDraw] = useState([]);
   const [text, onChangeText] = useState('');
   const [loading, setLoading] = useState(true);
-
   const [color, setColor] = useState(DEFAULT_COLORS[0][0][0]);
   const [thickness, setThickness] = useState(5);
   const [opacity, setOpacity] = useState(1);
   const [visibleBrushProperties, setVisibleBrushProperties] = useState(false);
   const [modalImage, setModalImage] = useState(null);
+  const [overlayOpacity] = useState(new Animated.Value(0));
+  
+  const canvasRef = useRef();
   const shotRef = useRef();
+  const mobileId = DeviceInfo.getUniqueId()
 
   useEffect(() => {
     new Promise.all([
@@ -54,32 +59,32 @@ export default () => {
   }, []);
 
   const handleUndo = () => {
-    canvasRef.current?.undo();
+    canvasRef.current?.undo()
   };
 
   const handleClear = () => {
     return Alert.alert(
       'Are your sure?',
-      'Are you sure you want to clean this note?',
+      'Do you want to clean the current note?',
       [
         {
           text: 'Yes',
           onPress: () => {
-            canvasRef.current?.clear();
-            saveTextToCache('');
+            canvasRef.current?.clear()
+            saveTextToCache('')
           },
         },
         {
           text: 'No',
         },
       ],
-    );
-  };
+    )
+  }
 
-  const [overlayOpacity] = useState(new Animated.Value(0));
+  
   const handleToggleBrushProperties = () => {
     if (!visibleBrushProperties) {
-      setVisibleBrushProperties(true);
+      setVisibleBrushProperties(true)
 
       Animated.timing(overlayOpacity, {
         toValue: 1,
@@ -93,7 +98,7 @@ export default () => {
         useNativeDriver: true,
       }).start(() => {
         setVisibleBrushProperties(false);
-      });
+      })
     }
   };
 
@@ -103,19 +108,19 @@ export default () => {
   };
 
   const saveCache = a => {
-    AsyncStorage.setItem('actualDrawing', JSON.stringify(a));
-  };
+    AsyncStorage.setItem('actualDrawing', JSON.stringify(a))
+  }
+
   const saveTextToCache = t => {
-    AsyncStorage.setItem('actualText', t);
-    onChangeText(t);
-  };
+    AsyncStorage.setItem('actualText', t)
+    onChangeText(t)
+  }
 
   const sendData = () => {
     Alert.alert(
       'Are your sure?',
-      'Are you sure you want to send this note to the partner?',
+      'Do you want to send this note to the partner?',
       [
-        // The "Yes" button
         {
           text: 'Yes',
           onPress: async () => {
@@ -124,39 +129,28 @@ export default () => {
               note: svgData,
               timestamp: Date.now(),
               text: text,
-            };
+            }
             // Save to my sent notes
             database()
-              .ref(`/${DeviceInfo.getUniqueId()}/sentNotes`)
+              .ref(`/${mobileId}/sentNotes`)
               .push()
-              .set(infoToSave);
+              .set(infoToSave)
             // Save to him recieved notes
             database()
-              .ref(`/${DeviceInfo.getUniqueId()}`)
-              .once('value')
-              .then(snapshot => {
-                console.info(111, snapshot.val().linkedWith);
-                database()
-                  .ref(`/${snapshot.val().linkedWith}/recievedNotes`)
-                  .push()
-                  .set(infoToSave);
-              });
-            // Open modal, read image in b64 and save to lastrecieved note
+              .ref(`/${mobileData.linkedWith}/recievedNotes`)
+              .push()
+              .set(infoToSave)
+            // Open modal, read image in b64 and save to lastrecieved note of my partner
             setModalImage(svgData);
             const uri = await shotRef.current.capture();
-            const base64Image = await RNFS.readFile(uri, 'base64');
+            const base64Image = await RNFS.readFile(uri, 'base64')
             database()
-              .ref(`/${DeviceInfo.getUniqueId()}`)
-              .once('value')
-              .then(snapshot => {
-                database()
-                  .ref(`/${snapshot.val().linkedWith}/lastRecievedNote`)
-                  .set(base64Image);
-              });
-            canvasRef.current?.clear();
-            setModalImage(null);
-            saveTextToCache('');
-            navigate('/');
+              .ref(`/${mobileData.linkedWith}/lastRecievedNote`)
+              .set(base64Image)
+            canvasRef.current?.clear()
+            setModalImage(null)
+            saveTextToCache('')
+            navigate('/')
           },
         },
         {
@@ -167,7 +161,7 @@ export default () => {
   };
 
   if (loading) {
-    return <Text>Loading...</Text>;
+    return <SafeAreaView><Text>Loading...</Text></SafeAreaView>
   }
 
   return (
@@ -227,8 +221,6 @@ export default () => {
         </View>
         <View
           style={{
-            marginTop: 5,
-            marginBottom: 5,
             display: 'flex',
             alignItems: 'center',
           }}>
@@ -237,8 +229,8 @@ export default () => {
             value={text}
             placeholder="✍🏻 Add some caption here (optional)"
             multiline
-            height={30}
-            style={{paddingLeft: 10, paddingRight: 10}}
+            height={40}
+            style={{paddingLeft: 10, paddingRight: 10 }}
             maxLength={300}
           />
         </View>

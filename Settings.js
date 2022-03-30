@@ -1,17 +1,16 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   Text,
   StyleSheet,
   View,
   Alert,
-  Button,
   Modal,
   Image,
   TouchableHighlight,
   SafeAreaView,
 } from 'react-native';
-import {useNavigate} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import database from '@react-native-firebase/database';
 import DeviceInfo from 'react-native-device-info';
 
@@ -24,27 +23,23 @@ export default () => {
   const mobileId = DeviceInfo.getUniqueId();
 
   const unlink = async () => {
-    return Alert.alert(
-      'Are your sure?',
-      'Do you want to unlink your partner?',
-      [
-        {
-          text: 'Yes',
-          onPress: async () => {
-            let meData = await database()
-              .ref(`/${mobileId}`)
-              .once('value')
-              .then(snapshot => snapshot.val());
-            database().ref(`/${mobileId}`).update({linkedWith: null});
-            database().ref(`/${meData.linkedWith}`).update({linkedWith: null});
-            navigate('/');
-          },
+    return Alert.alert('Sure?', 'Do you want to unlink your partner?', [
+      {
+        text: 'Yes',
+        onPress: async () => {
+          let meData = await database()
+            .ref(`/${mobileId}`)
+            .once('value')
+            .then(snapshot => snapshot.val());
+          database().ref(`/${mobileId}`).update({ linkedWith: null });
+          database().ref(`/${meData.linkedWith}`).update({ linkedWith: null });
+          navigate('/');
         },
-        {
-          text: 'No',
-        },
-      ],
-    );
+      },
+      {
+        text: 'No',
+      },
+    ]);
   };
 
   return (
@@ -55,7 +50,8 @@ export default () => {
         visible={showModalStats}
         onRequestClose={() => {
           setShowModalStats(false);
-        }}>
+        }}
+      >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <View
@@ -66,11 +62,12 @@ export default () => {
                 flexDirection: 'row',
                 justifyContent: 'flex-end',
                 width: '100%',
-              }}>
+              }}
+            >
               <TouchableHighlight onPress={() => setShowModalStats(false)}>
                 <Image
                   source={require('./close-icon.webp')}
-                  style={{width: 30, height: 30}}
+                  style={{ width: 30, height: 30 }}
                 />
               </TouchableHighlight>
             </View>
@@ -85,7 +82,8 @@ export default () => {
         visible={showModalPolicies}
         onRequestClose={() => {
           setShowModalPolicies(false);
-        }}>
+        }}
+      >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <View
@@ -96,11 +94,12 @@ export default () => {
                 flexDirection: 'row',
                 justifyContent: 'flex-end',
                 width: '100%',
-              }}>
+              }}
+            >
               <TouchableHighlight onPress={() => setShowModalPolicies(false)}>
                 <Image
                   source={require('./close-icon.webp')}
-                  style={{width: 30, height: 30}}
+                  style={{ width: 30, height: 30 }}
                 />
               </TouchableHighlight>
             </View>
@@ -114,7 +113,8 @@ export default () => {
         visible={showModalFeedback}
         onRequestClose={() => {
           setShowModalFeedback(false);
-        }}>
+        }}
+      >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <View
@@ -125,11 +125,12 @@ export default () => {
                 flexDirection: 'row',
                 justifyContent: 'flex-end',
                 width: '100%',
-              }}>
+              }}
+            >
               <TouchableHighlight onPress={() => setShowModalFeedback(false)}>
                 <Image
                   source={require('./close-icon.webp')}
-                  style={{width: 30, height: 30}}
+                  style={{ width: 30, height: 30 }}
                 />
               </TouchableHighlight>
             </View>
@@ -143,30 +144,33 @@ export default () => {
           flexDirection: 'row',
           justifyContent: 'space-between',
           backgroundColor: '#FFE2E2',
-        }}>
+        }}
+      >
         <TouchableHighlight
           onPress={() => navigate('/')}
           title="Save"
           color="#841584"
-          accessibilityLabel="Learn more about this purple button">
+          accessibilityLabel="Learn more about this purple button"
+        >
           <Image
-            style={{width: 40, height: 40}}
+            style={{ width: 40, height: 40 }}
             source={require('./back.webp')}
           />
         </TouchableHighlight>
-        <Text style={{alignSelf: 'center', fontWeight: '500'}}>SETTINGS</Text>
+        <Text style={{ alignSelf: 'center', fontWeight: '500' }}>SETTINGS</Text>
         <TouchableHighlight
           onPress={() => navigate('/canva')}
           title="New"
           color="#841584"
-          accessibilityLabel="Learn more about this purple button">
+          accessibilityLabel="Learn more about this purple button"
+        >
           <Image
-            style={{width: 21, height: 21, margin: 10}}
+            style={{ width: 21, height: 21, margin: 10 }}
             source={require('./create-icon.webp')}
           />
         </TouchableHighlight>
       </View>
-      <View style={{display: 'flex'}}>
+      <View style={{ display: 'flex' }}>
         {/* <TouchableHighlight
           onPress={() => setShowModalStats(true)}
           style={{borderBottomWidth: 1, padding: 15}}>
@@ -179,13 +183,17 @@ export default () => {
         </TouchableHighlight> */}
         <TouchableHighlight
           onPress={() => setShowModalPolicies(true)}
-          style={{borderBottomWidth: 1, padding: 15}}>
+          style={{ borderBottomWidth: 1, padding: 15 }}
+        >
           <Text>Policies 🧑🏻‍⚖️</Text>
         </TouchableHighlight>
         <TouchableHighlight
           onPress={unlink}
-          style={{borderBottomWidth: 1, padding: 15}}>
-          <Text style={{color: 'red', fontWeight: 'bold'}}>Unlink partner 🚷</Text>
+          style={{ borderBottomWidth: 1, padding: 15 }}
+        >
+          <Text style={{ color: 'red', fontWeight: 'bold' }}>
+            Unlink partner 🚷
+          </Text>
         </TouchableHighlight>
       </View>
     </SafeAreaView>

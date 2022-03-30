@@ -1,117 +1,52 @@
 /* eslint-disable no-alert */
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable curly */
-import React, {useRef, useState, useEffect} from 'react';
+import React, { useRef, useState, useEffect, useContext } from 'react';
 import {
   StyleSheet,
   Text,
   View,
   SafeAreaView,
-  StatusBar,
   ScrollView,
-  Button,
   Image,
   TextInput,
   Share,
   TouchableHighlight,
   Modal,
 } from 'react-native';
-import {useNavigate} from 'react-router-dom';
-import {SvgXml} from 'react-native-svg';
+import { useNavigate } from 'react-router-dom';
+import { SvgXml } from 'react-native-svg';
 import database from '@react-native-firebase/database';
 import DeviceInfo from 'react-native-device-info';
-import ViewShot, {releaseCapture} from 'react-native-view-shot';
-import CameraRoll from '@react-native-community/cameraroll';
-import {PermissionsAndroid, Platform} from 'react-native';
+import ViewShot, { releaseCapture } from 'react-native-view-shot';
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en.json';
+import Clipboard from '@react-native-clipboard/clipboard';
+import { UserContext } from './context'
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo('en-US');
-import {NativeModules} from 'react-native';
-import Clipboard from '@react-native-clipboard/clipboard';
-// import {Dirs, FileSystem} from 'react-native-file-access';
 
-import SharedGroupPreferences from 'react-native-shared-group-preferences';
-const SharedStorage = NativeModules.SharedStorage;
 
 export default () => {
   let navigate = useNavigate();
-  const [mobileId, setMobileId] = useState(DeviceInfo.getUniqueId());
-  const [mobileData, setMobileData] = useState({});
-  const [loading, setLoading] = useState(true);
+  const { mobileData, loading } = useContext(UserContext)
+  
   const [showSentNotes, setShowSentNotes] = useState(true);
   const [text, onChangeText] = useState('');
   const [modalImage, setModalImage] = useState(null);
-  const shotRef = useRef();
-
-  useEffect(() => {
-    console.info(mobileId);
-    const mD = database()
-      .ref(`/${mobileId}`)
-      .on('value', snapshot => {
-        let data = snapshot.val();
-        if (!data) {
-          data = {};
-          const now = Date.now();
-          database().ref(`/${mobileId}`).set({createdAt: now});
-          data.createdAt = now;
-        }
-        if (data.sentNotes) {
-          data.sentNotes = Object.values(data.sentNotes).sort((a, b) =>
-            a.timestamp < b.timestamp ? 1 : -1,
-          );
-          const widgetData = {
-            svgInBase64: data.lastRecievedNote,
-          };
-          if (Platform.OS === 'android') {
-            SharedStorage.set(JSON.stringify(widgetData));
-          } else {
-            SharedGroupPreferences.setItem(
-              'widgetKey',
-              widgetData,
-              'group.com.notetes.notetesWidget',
-            );
-          }
-        }
-        if (data.recievedNotes) {
-          data.recievedNotes = Object.values(data.recievedNotes).sort((a, b) =>
-            a.timestamp < b.timestamp ? 1 : -1,
-          );
-        }
-        setMobileData(data);
-        setLoading(false);
-      });
-    return () => database().ref(`/${mobileId}`).off('value', mD);
-  }, [mobileId]);
-
-  async function hasAndroidPermission() {
-    const permission = PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE;
-    const hasPermission = await PermissionsAndroid.check(permission);
-    if (hasPermission) {
-      return true;
-    }
-    const status = await PermissionsAndroid.request(permission);
-    return status === 'granted';
-  }
-
-  async function savePicture(picture) {
-    if (Platform.OS === 'android' && !(await hasAndroidPermission())) {
-      return;
-    }
-    CameraRoll.save(picture);
-  }
+  const shotRef = useRef();  
+  const mobileId = DeviceInfo.getUniqueId()
 
   async function share() {
     try {
-      console.info(1111);
-      const uri = await shotRef.current.capture();
+      const uri = await shotRef.current.capture()
       await Share.share({
         title: 'Sharing your note...',
         url: uri,
-      });
-      setModalImage(null);
+      })
+      setModalImage(null)
     } catch (err) {
-      console.log(err);
+      console.log(err)
     }
   }
 
@@ -119,28 +54,24 @@ export default () => {
     const targetUser = await database()
       .ref(`/${text}`)
       .once('value')
-      .then(snapshot => snapshot.val());
+      .then(snapshot => snapshot.val())
 
     if (!targetUser) {
-      alert('This partner must to download the app first');
-      return;
+      alert('This partner must download the app first')
+      return
     }
     if (text === mobileId) {
-      alert('This is your code. You must paste your partners code.');
-      return;
+      alert('This is your code. You must paste your partners code.')
+      return
     }
     if (targetUser.linkedWith) {
-      alert(
-        'This partner already have a user linked. Tell him unlink that first.',
-      );
-      return;
+      alert('This partner already have a user linked. Tell him unlink that first.')
+      return
     }
 
-    // Save my link
-    database().ref(`/${mobileId}`).update({linkedWith: text});
-
-    // Save other user link
-    database().ref(`/${text}`).update({linkedWith: mobileId});
+    // Save my link and partner link
+    database().ref(`/${mobileId}`).update({ linkedWith: text });
+    database().ref(`/${text}`).update({ linkedWith: mobileId });
   };
 
   if (loading)
@@ -158,14 +89,16 @@ export default () => {
         visible={modalImage !== null}
         onRequestClose={() => {
           setModalImage(null);
-        }}>
+        }}
+      >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <Text style={styles.modalText} />
             <ViewShot
               ref={shotRef}
-              style={{backgroundColor: 'white'}}
-              options={{format: 'jpg'}}>
+              style={{ backgroundColor: 'white' }}
+              options={{ format: 'jpg' }}
+            >
               <SvgXml xml={modalImage} />
             </ViewShot>
             <View
@@ -176,17 +109,18 @@ export default () => {
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 width: '100%',
-              }}>
+              }}
+            >
               <TouchableHighlight onPress={() => share()}>
                 <Image
                   source={require('./share-icon.webp')}
-                  style={{width: 30, height: 30}}
+                  style={{ width: 30, height: 30 }}
                 />
               </TouchableHighlight>
               <TouchableHighlight onPress={() => setModalImage(null)}>
                 <Image
                   source={require('./close-icon.webp')}
-                  style={{width: 30, height: 30}}
+                  style={{ width: 30, height: 30 }}
                 />
               </TouchableHighlight>
             </View>
@@ -199,27 +133,30 @@ export default () => {
           flexDirection: 'row',
           justifyContent: 'space-between',
           backgroundColor: '#FFE2E2',
-        }}>
+        }}
+      >
         <TouchableHighlight
           onPress={() => navigate('/settings')}
           title="Save"
           color="#841584"
-          accessibilityLabel="Learn more about this purple button">
+          accessibilityLabel="Learn more about this purple button"
+        >
           <Image
-            style={{width: 20, height: 20, margin: 10}}
+            style={{ width: 20, height: 20, margin: 10 }}
             source={require('./settings-icon.png')}
           />
         </TouchableHighlight>
-        <Text style={{alignSelf: 'center', fontWeight: 'bold', fontSize: 15}}>
+        <Text style={{ alignSelf: 'center', fontWeight: 'bold', fontSize: 15 }}>
           NOTETES
         </Text>
         <TouchableHighlight
           onPress={() => navigate('/canva')}
           title="New"
           disabled={!mobileData.linkedWith}
-          accessibilityLabel="Learn more about this purple button">
+          accessibilityLabel="Learn more about this purple button"
+        >
           <Image
-            style={{width: 21, height: 21, margin: 10}}
+            style={{ width: 21, height: 21, margin: 10 }}
             source={require('./create-icon.webp')}
           />
         </TouchableHighlight>
@@ -231,17 +168,18 @@ export default () => {
             alignItems: 'center',
             width: '100%',
             marginTop: 30,
-          }}>
-          <Text style={{fontSize: 60, fontWeight: 'bold'}}>First...</Text>
-          <Text style={{marginBottom: 20, fontWeight: '200'}}>
+          }}
+        >
+          <Text style={{ fontSize: 60, fontWeight: 'bold' }}>First...</Text>
+          <Text style={{ marginBottom: 20, fontWeight: '200' }}>
             CONNECT WITH A PARTNER!
           </Text>
 
           <Image
             source={require('./link-icon.png')}
-            style={{width: 250, height: 200}}
+            style={{ width: 250, height: 200 }}
           />
-          <Text style={{fontSize: 15, marginBottom: 10, fontWeight: '200'}}>
+          <Text style={{ fontSize: 15, marginBottom: 10, fontWeight: '200' }}>
             Share your code
           </Text>
           <View
@@ -250,29 +188,34 @@ export default () => {
               flexDirection: 'row',
               justifyContent: 'center',
               alignContent: 'center',
-            }}>
-            <Text style={{marginBottom: 20, marginRight: 10}}>{mobileId}</Text>
+            }}
+          >
+            <Text style={{ marginBottom: 20, marginRight: 10 }}>
+              {mobileId}
+            </Text>
             <TouchableHighlight
-              style={{alignItems: 'center'}}
-              onPress={() => Clipboard.setString(mobileId)}>
+              style={{ alignItems: 'center' }}
+              onPress={() => Clipboard.setString(mobileId)}
+            >
               <Image
                 source={require('./copy-icon.png')}
-                style={{width: 20, height: 20}}
+                style={{ width: 20, height: 20 }}
               />
             </TouchableHighlight>
           </View>
-          <Text style={{fontWeight: '100'}}>|</Text>
-          <Text style={{fontWeight: 'bold', fontSize: 30, color: '#FFE2E2'}}>
+          <Text style={{ fontWeight: '100' }}>|</Text>
+          <Text style={{ fontWeight: 'bold', fontSize: 30, color: '#FFE2E2' }}>
             OR
           </Text>
-          <Text style={{fontWeight: '100', marginBottom: 10}}>|</Text>
+          <Text style={{ fontWeight: '100', marginBottom: 10 }}>|</Text>
           <Text
             style={{
               fontSize: 15,
               padding: 10,
               fontWeight: '200',
               marginBottom: 0,
-            }}>
+            }}
+          >
             Enter your partner's code
           </Text>
           <TextInput
@@ -302,7 +245,8 @@ export default () => {
               display: 'flex',
               alignItems: 'center',
               padding: 10,
-            }}>
+            }}
+          >
             <Text>Connect</Text>
           </TouchableHighlight>
         </View>
@@ -313,7 +257,8 @@ export default () => {
               display: 'flex',
               flexDirection: 'row',
               justifyContent: 'space-around',
-            }}>
+            }}
+          >
             <View
               style={{
                 backgroundColor: `${showSentNotes ? '#f0f0f0' : 'white'}`,
@@ -321,10 +266,12 @@ export default () => {
                 height: '100%',
                 padding: 10,
                 alignItems: 'center',
-              }}>
+              }}
+            >
               <TouchableHighlight
                 onPress={() => setShowSentNotes(false)}
-                title="Recieved Notes">
+                title="Recieved Notes"
+              >
                 <Text>📩 Recieved notes</Text>
               </TouchableHighlight>
             </View>
@@ -335,10 +282,12 @@ export default () => {
                 height: '100%',
                 padding: 10,
                 alignItems: 'center',
-              }}>
+              }}
+            >
               <TouchableHighlight
                 onPress={() => setShowSentNotes(true)}
-                title="Sent notes">
+                title="Sent notes"
+              >
                 <Text>📤 Sent notes</Text>
               </TouchableHighlight>
             </View>
@@ -348,14 +297,16 @@ export default () => {
                 <ScrollView>
                   <View
                     key={mobileData.sentNotes[0].timestamp}
-                    style={{width: '100%', marginBottom: 10}}>
+                    style={{ width: '100%', marginBottom: 10 }}
+                  >
                     <Text
                       style={{
                         fontSize: 16,
                         fontWeight: '500',
                         padding: 10,
                         textAlign: 'center',
-                      }}>
+                      }}
+                    >
                       Last note
                     </Text>
                     <Text
@@ -365,7 +316,8 @@ export default () => {
                         textAlign: 'center',
                         paddingTop: 0,
                         marginTop: 0,
-                      }}>
+                      }}
+                    >
                       {timeAgo.format(mobileData.sentNotes[0].timestamp)}
                     </Text>
                     <View
@@ -374,12 +326,14 @@ export default () => {
                         padding: 10,
                         display: 'flex',
                         alignItems: 'center',
-                      }}>
+                      }}
+                    >
                       <TouchableHighlight
                         onPress={() =>
                           setModalImage(mobileData.sentNotes[0].note)
                         }
-                        style={{width: 200, height: 200}}>
+                        style={{ width: 200, height: 200 }}
+                      >
                         <SvgXml
                           xml={mobileData.sentNotes[0].note}
                           width="100%"
@@ -387,7 +341,7 @@ export default () => {
                         />
                       </TouchableHighlight>
                       {mobileData.sentNotes[0].text && (
-                        <Text style={{padding: 10, overflow: 'hidden'}}>
+                        <Text style={{ padding: 10, overflow: 'hidden' }}>
                           {mobileData.sentNotes[0].text}
                         </Text>
                       )}
@@ -400,7 +354,8 @@ export default () => {
                       padding: 10,
                       textAlign: 'center',
                       backgroundColor: '#f0f0f0',
-                    }}>
+                    }}
+                  >
                     - Last 20 notes sent -
                   </Text>
                   {mobileData.sentNotes.slice(1, 21).map(note => (
@@ -413,7 +368,8 @@ export default () => {
                           paddingLeft: 10,
                           paddingTop: 10,
                           paddingBottom: 0,
-                        }}>
+                        }}
+                      >
                         {timeAgo.format(note.timestamp)}
                       </Text>
                       <View
@@ -423,7 +379,8 @@ export default () => {
                           flexDirection: 'row',
                           justifyContent: 'space-between',
                           alignItems: 'center',
-                        }}>
+                        }}
+                      >
                         <TouchableHighlight
                           onPress={() => setModalImage(note.note)}
                           style={{
@@ -431,7 +388,8 @@ export default () => {
                             height: 150,
                             display: 'flex',
                             alignItems: 'center',
-                          }}>
+                          }}
+                        >
                           <SvgXml xml={note.note} width="100%" height="100%" />
                         </TouchableHighlight>
                         <Text
@@ -442,7 +400,8 @@ export default () => {
                             overflow: 'hidden',
                             textAlign: 'left',
                             width: '100%',
-                          }}>
+                          }}
+                        >
                           {note.text ||
                             'No textdsadasndjksadnkjasdasdsadoñasd ahiopd sajiod jasiod jasiod jasio djasiod jsaiod jsaiod jsaiopdhjasdnhasji dhjias dais aaaaaaaa dipsah bbbbbbbbbbbbbbbbbbbb duisah dusiah dsauih njdsand sahdjias hdjasi dhsaui dhasui dhsauid hasuid hasuidh sauidh sauidh asuidh asid'}
                         </Text>
@@ -461,14 +420,16 @@ export default () => {
                 <ScrollView>
                   <View
                     key={mobileData.recievedNotes[0].timestamp}
-                    style={{width: '100%', marginBottom: 10}}>
+                    style={{ width: '100%', marginBottom: 10 }}
+                  >
                     <Text
                       style={{
                         fontSize: 16,
                         fontWeight: '500',
                         padding: 10,
                         textAlign: 'center',
-                      }}>
+                      }}
+                    >
                       Last note
                     </Text>
                     <Text
@@ -478,7 +439,8 @@ export default () => {
                         textAlign: 'center',
                         paddingTop: 0,
                         marginTop: 0,
-                      }}>
+                      }}
+                    >
                       {timeAgo.format(mobileData.recievedNotes[0].timestamp)}
                     </Text>
                     <View
@@ -487,12 +449,14 @@ export default () => {
                         padding: 10,
                         display: 'flex',
                         alignItems: 'center',
-                      }}>
+                      }}
+                    >
                       <TouchableHighlight
                         onPress={() =>
                           setModalImage(mobileData.recievedNotes[0].note)
                         }
-                        style={{width: 200, height: 200}}>
+                        style={{ width: 200, height: 200 }}
+                      >
                         <SvgXml
                           xml={mobileData.recievedNotes[0].note}
                           width="100%"
@@ -500,7 +464,7 @@ export default () => {
                         />
                       </TouchableHighlight>
                       {mobileData.recievedNotes[0].text && (
-                        <Text style={{padding: 10, overflow: 'hidden'}}>
+                        <Text style={{ padding: 10, overflow: 'hidden' }}>
                           {mobileData.recievedNotes[0].text}
                         </Text>
                       )}
@@ -513,7 +477,8 @@ export default () => {
                       padding: 10,
                       textAlign: 'center',
                       backgroundColor: '#f0f0f0',
-                    }}>
+                    }}
+                  >
                     - Last 20 notes sent -
                   </Text>
                   {mobileData.recievedNotes.slice(1, 21).map(note => (
@@ -526,7 +491,8 @@ export default () => {
                           paddingLeft: 10,
                           paddingTop: 10,
                           paddingBottom: 0,
-                        }}>
+                        }}
+                      >
                         {timeAgo.format(note.timestamp)}
                       </Text>
                       <View
@@ -536,7 +502,8 @@ export default () => {
                           flexDirection: 'row',
                           justifyContent: 'space-between',
                           alignItems: 'center',
-                        }}>
+                        }}
+                      >
                         <TouchableHighlight
                           onPress={() => setModalImage(note.note)}
                           style={{
@@ -544,7 +511,8 @@ export default () => {
                             height: 150,
                             display: 'flex',
                             alignItems: 'center',
-                          }}>
+                          }}
+                        >
                           <SvgXml xml={note.note} width="100%" height="100%" />
                         </TouchableHighlight>
                         <Text
@@ -555,7 +523,8 @@ export default () => {
                             overflow: 'hidden',
                             textAlign: 'left',
                             width: '100%',
-                          }}>
+                          }}
+                        >
                           {note.text ||
                             'No textdsadasndjksadnkjasdasdsadoñasd ahiopd sajiod jasiod jasiod jasio djasiod jsaiod jsaiod jsaiopdhjasdnhasji dhjias dais aaaaaaaa dipsah bbbbbbbbbbbbbbbbbbbb duisah dusiah dsauih njdsand sahdjias hdjasi dhsaui dhasui dhsauid hasuid hasuidh sauidh sauidh asuidh asid'}
                         </Text>
