@@ -1,7 +1,7 @@
 /* eslint-disable no-alert */
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable curly */
-import React, { useRef, useState, useEffect, useContext } from 'react';
+import React, { useRef, useState, useContext } from 'react';
 import {
   StyleSheet,
   Text,
@@ -11,18 +11,23 @@ import {
   Image,
   TextInput,
   Share,
-  TouchableHighlight,
+  TouchableOpacity,
   Modal,
 } from 'react-native';
 import { useNavigate } from 'react-router-dom';
 import { SvgXml } from 'react-native-svg';
 import database from '@react-native-firebase/database';
 import DeviceInfo from 'react-native-device-info';
-import ViewShot, { releaseCapture } from 'react-native-view-shot';
+import ViewShot from 'react-native-view-shot';
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en.json';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { UserContext } from './context'
+import styled from 'styled-components/native'
+const SText = styled.Text`
+  color: black;
+`
+
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo('en-US');
 
@@ -74,13 +79,6 @@ export default () => {
     database().ref(`/${text}`).update({ linkedWith: mobileId });
   };
 
-  if (loading)
-    return (
-      <SafeAreaView>
-        <Text>Loading...</Text>
-      </SafeAreaView>
-    );
-
   return (
     <SafeAreaView>
       <Modal
@@ -93,7 +91,7 @@ export default () => {
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <Text style={styles.modalText} />
+            <SText style={styles.modalText} />
             <ViewShot
               ref={shotRef}
               style={{ backgroundColor: 'white' }}
@@ -111,18 +109,18 @@ export default () => {
                 width: '100%',
               }}
             >
-              <TouchableHighlight onPress={() => share()}>
+              <TouchableOpacity onPress={() => share()}>
                 <Image
                   source={require('./share-icon.webp')}
                   style={{ width: 30, height: 30 }}
                 />
-              </TouchableHighlight>
-              <TouchableHighlight onPress={() => setModalImage(null)}>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setModalImage(null)}>
                 <Image
                   source={require('./close-icon.webp')}
                   style={{ width: 30, height: 30 }}
                 />
-              </TouchableHighlight>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -135,7 +133,7 @@ export default () => {
           backgroundColor: '#FFE2E2',
         }}
       >
-        <TouchableHighlight
+        <TouchableOpacity
           onPress={() => navigate('/settings')}
           title="Save"
           color="#841584"
@@ -145,11 +143,11 @@ export default () => {
             style={{ width: 20, height: 20, margin: 10 }}
             source={require('./settings-icon.png')}
           />
-        </TouchableHighlight>
-        <Text style={{ alignSelf: 'center', fontWeight: 'bold', fontSize: 15 }}>
+        </TouchableOpacity>
+        <SText style={{ alignSelf: 'center', fontWeight: 'bold', fontSize: 15 }}>
           NOTETES
-        </Text>
-        <TouchableHighlight
+        </SText>
+        <TouchableOpacity
           onPress={() => navigate('/canva')}
           title="New"
           disabled={!mobileData.linkedWith}
@@ -159,7 +157,7 @@ export default () => {
             style={{ width: 21, height: 21, margin: 10 }}
             source={require('./create-icon.webp')}
           />
-        </TouchableHighlight>
+        </TouchableOpacity>
       </View>
       {!mobileData.linkedWith ? (
         <View
@@ -170,18 +168,18 @@ export default () => {
             marginTop: 30,
           }}
         >
-          <Text style={{ fontSize: 60, fontWeight: 'bold' }}>First...</Text>
-          <Text style={{ marginBottom: 20, fontWeight: '200' }}>
+          <SText style={{ fontSize: 60, fontWeight: 'bold' }}>First...</SText>
+          <SText style={{ marginBottom: 20, fontWeight: '200' }}>
             CONNECT WITH A PARTNER!
-          </Text>
+          </SText>
 
           <Image
             source={require('./link-icon.png')}
             style={{ width: 250, height: 200 }}
           />
-          <Text style={{ fontSize: 15, marginBottom: 10, fontWeight: '200' }}>
+          <SText style={{ fontSize: 15, marginBottom: 10, fontWeight: '200' }}>
             Share your code
-          </Text>
+          </SText>
           <View
             style={{
               display: 'flex',
@@ -190,10 +188,10 @@ export default () => {
               alignContent: 'center',
             }}
           >
-            <Text style={{ marginBottom: 20, marginRight: 10 }}>
+            <SText style={{ marginBottom: 20, marginRight: 10 }}>
               {mobileId}
-            </Text>
-            <TouchableHighlight
+            </SText>
+            <TouchableOpacity
               style={{ alignItems: 'center' }}
               onPress={() => Clipboard.setString(mobileId)}
             >
@@ -201,14 +199,14 @@ export default () => {
                 source={require('./copy-icon.png')}
                 style={{ width: 20, height: 20 }}
               />
-            </TouchableHighlight>
+            </TouchableOpacity>
           </View>
-          <Text style={{ fontWeight: '100' }}>|</Text>
-          <Text style={{ fontWeight: 'bold', fontSize: 30, color: '#FFE2E2' }}>
+          <SText style={{ fontWeight: '100' }}>|</SText>
+          <SText style={{ fontWeight: 'bold', fontSize: 30, color: '#FFE2E2' }}>
             OR
-          </Text>
-          <Text style={{ fontWeight: '100', marginBottom: 10 }}>|</Text>
-          <Text
+          </SText>
+          <SText style={{ fontWeight: '100', marginBottom: 10 }}>|</SText>
+          <SText
             style={{
               fontSize: 15,
               padding: 10,
@@ -217,8 +215,8 @@ export default () => {
             }}
           >
             Enter your partner's code
-          </Text>
-          <TextInput
+          </SText>
+          <STextInput
             onChangeText={onChangeText}
             value={text}
             autoCapitalize="none"
@@ -232,7 +230,7 @@ export default () => {
               backgroundColor: '#e3e3e3',
             }}
           />
-          <TouchableHighlight
+          <TouchableOpacity
             onPress={link}
             title="Connect"
             color="#841584"
@@ -247,8 +245,8 @@ export default () => {
               padding: 10,
             }}
           >
-            <Text>Connect</Text>
-          </TouchableHighlight>
+            <SText>Connect</SText>
+          </TouchableOpacity>
         </View>
       ) : (
         <View>
@@ -268,12 +266,12 @@ export default () => {
                 alignItems: 'center',
               }}
             >
-              <TouchableHighlight
+              <TouchableOpacity
                 onPress={() => setShowSentNotes(false)}
                 title="Recieved Notes"
               >
-                <Text>📩 Recieved notes</Text>
-              </TouchableHighlight>
+                <SText>📩 Recieved notes</SText>
+              </TouchableOpacity>
             </View>
             <View
               style={{
@@ -284,12 +282,12 @@ export default () => {
                 alignItems: 'center',
               }}
             >
-              <TouchableHighlight
+              <TouchableOpacity
                 onPress={() => setShowSentNotes(true)}
                 title="Sent notes"
               >
-                <Text>📤 Sent notes</Text>
-              </TouchableHighlight>
+                <SText>📤 Sent notes</SText>
+              </TouchableOpacity>
             </View>
           </View>
           {showSentNotes
@@ -299,7 +297,7 @@ export default () => {
                     key={mobileData.sentNotes[0].timestamp}
                     style={{ width: '100%', marginBottom: 10 }}
                   >
-                    <Text
+                    <SText
                       style={{
                         fontSize: 16,
                         fontWeight: '500',
@@ -308,8 +306,8 @@ export default () => {
                       }}
                     >
                       Last note
-                    </Text>
-                    <Text
+                    </SText>
+                    <SText
                       style={{
                         fontWeight: '200',
                         color: 'gray',
@@ -319,7 +317,7 @@ export default () => {
                       }}
                     >
                       {timeAgo.format(mobileData.sentNotes[0].timestamp)}
-                    </Text>
+                    </SText>
                     <View
                       key={mobileData.sentNotes[0].timestamp}
                       style={{
@@ -328,7 +326,7 @@ export default () => {
                         alignItems: 'center',
                       }}
                     >
-                      <TouchableHighlight
+                      <TouchableOpacity
                         onPress={() =>
                           setModalImage(mobileData.sentNotes[0].note)
                         }
@@ -339,15 +337,15 @@ export default () => {
                           width="100%"
                           height="100%"
                         />
-                      </TouchableHighlight>
-                      {mobileData.sentNotes[0].text && (
-                        <Text style={{ padding: 10, overflow: 'hidden' }}>
+                      </TouchableOpacity>
+                      {mobileData.sentNotes[0] && (
+                        <SText style={{ padding: 10, overflow: 'hidden' }}>
                           {mobileData.sentNotes[0].text}
-                        </Text>
+                        </SText>
                       )}
                     </View>
                   </View>
-                  <Text
+                  <SText
                     style={{
                       fontSize: 16,
                       fontWeight: '200',
@@ -357,10 +355,10 @@ export default () => {
                     }}
                   >
                     - Last 20 notes sent -
-                  </Text>
+                  </SText>
                   {mobileData.sentNotes.slice(1, 21).map(note => (
                     <View key={note.timestamp}>
-                      <Text
+                      <SText
                         style={{
                           fontWeight: '100',
                           color: 'gray',
@@ -371,7 +369,7 @@ export default () => {
                         }}
                       >
                         {timeAgo.format(note.timestamp)}
-                      </Text>
+                      </SText>
                       <View
                         style={{
                           margin: 10,
@@ -381,7 +379,7 @@ export default () => {
                           alignItems: 'center',
                         }}
                       >
-                        <TouchableHighlight
+                        <TouchableOpacity
                           onPress={() => setModalImage(note.note)}
                           style={{
                             width: '40%',
@@ -391,8 +389,8 @@ export default () => {
                           }}
                         >
                           <SvgXml xml={note.note} width="100%" height="100%" />
-                        </TouchableHighlight>
-                        <Text
+                        </TouchableOpacity>
+                        <SText
                           style={{
                             display: 'flex',
                             flexShrink: 1,
@@ -402,9 +400,8 @@ export default () => {
                             width: '100%',
                           }}
                         >
-                          {note.text ||
-                            'No textdsadasndjksadnkjasdasdsadoñasd ahiopd sajiod jasiod jasiod jasio djasiod jsaiod jsaiod jsaiopdhjasdnhasji dhjias dais aaaaaaaa dipsah bbbbbbbbbbbbbbbbbbbb duisah dusiah dsauih njdsand sahdjias hdjasi dhsaui dhasui dhsauid hasuid hasuidh sauidh sauidh asuidh asid'}
-                        </Text>
+                          {note.text}
+                        </SText>
                       </View>
                       <View
                         style={{
@@ -422,7 +419,7 @@ export default () => {
                     key={mobileData.recievedNotes[0].timestamp}
                     style={{ width: '100%', marginBottom: 10 }}
                   >
-                    <Text
+                    <SText
                       style={{
                         fontSize: 16,
                         fontWeight: '500',
@@ -431,8 +428,8 @@ export default () => {
                       }}
                     >
                       Last note
-                    </Text>
-                    <Text
+                    </SText>
+                    <SText
                       style={{
                         fontWeight: '200',
                         color: 'gray',
@@ -442,7 +439,7 @@ export default () => {
                       }}
                     >
                       {timeAgo.format(mobileData.recievedNotes[0].timestamp)}
-                    </Text>
+                    </SText>
                     <View
                       key={mobileData.recievedNotes[0].timestamp}
                       style={{
@@ -451,7 +448,7 @@ export default () => {
                         alignItems: 'center',
                       }}
                     >
-                      <TouchableHighlight
+                      <TouchableOpacity
                         onPress={() =>
                           setModalImage(mobileData.recievedNotes[0].note)
                         }
@@ -462,15 +459,15 @@ export default () => {
                           width="100%"
                           height="100%"
                         />
-                      </TouchableHighlight>
-                      {mobileData.recievedNotes[0].text && (
-                        <Text style={{ padding: 10, overflow: 'hidden' }}>
+                      </TouchableOpacity>
+                      {mobileData.recievedNotes[0] && (
+                        <SText style={{ padding: 10, overflow: 'hidden' }}>
                           {mobileData.recievedNotes[0].text}
-                        </Text>
+                        </SText>
                       )}
                     </View>
                   </View>
-                  <Text
+                  <SText
                     style={{
                       fontSize: 16,
                       fontWeight: '200',
@@ -480,10 +477,10 @@ export default () => {
                     }}
                   >
                     - Last 20 notes sent -
-                  </Text>
+                  </SText>
                   {mobileData.recievedNotes.slice(1, 21).map(note => (
                     <View key={note.timestamp}>
-                      <Text
+                      <SText
                         style={{
                           fontWeight: '100',
                           color: 'gray',
@@ -494,7 +491,7 @@ export default () => {
                         }}
                       >
                         {timeAgo.format(note.timestamp)}
-                      </Text>
+                      </SText>
                       <View
                         style={{
                           margin: 10,
@@ -504,7 +501,7 @@ export default () => {
                           alignItems: 'center',
                         }}
                       >
-                        <TouchableHighlight
+                        <TouchableOpacity
                           onPress={() => setModalImage(note.note)}
                           style={{
                             width: '40%',
@@ -514,8 +511,8 @@ export default () => {
                           }}
                         >
                           <SvgXml xml={note.note} width="100%" height="100%" />
-                        </TouchableHighlight>
-                        <Text
+                        </TouchableOpacity>
+                        <SText
                           style={{
                             display: 'flex',
                             flexShrink: 1,
@@ -525,9 +522,8 @@ export default () => {
                             width: '100%',
                           }}
                         >
-                          {note.text ||
-                            'No textdsadasndjksadnkjasdasdsadoñasd ahiopd sajiod jasiod jasiod jasio djasiod jsaiod jsaiod jsaiopdhjasdnhasji dhjias dais aaaaaaaa dipsah bbbbbbbbbbbbbbbbbbbb duisah dusiah dsauih njdsand sahdjias hdjasi dhsaui dhasui dhsauid hasuid hasuidh sauidh sauidh asuidh asid'}
-                        </Text>
+                          {note.text || ''}
+                        </SText>
                       </View>
                       <View
                         style={{

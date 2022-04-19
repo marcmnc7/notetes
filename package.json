@@ -1,6 +1,6 @@
 {
   "name": "notetes",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
@@ -33,7 +33,8 @@
     "react-native-view-shot": "^3.1.2",
     "react-native-webview": "^11.17.2",
     "react-router-dom": "^6.2.2",
-    "react-router-native": "^6.2.2"
+    "react-router-native": "^6.2.2",
+    "styled-components": "^5.3.5"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",

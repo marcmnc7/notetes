@@ -7,13 +7,16 @@ import {
   Alert,
   Modal,
   Image,
-  TouchableHighlight,
+  TouchableOpacity,
   SafeAreaView,
 } from 'react-native';
 import { useNavigate } from 'react-router-dom';
 import database from '@react-native-firebase/database';
 import DeviceInfo from 'react-native-device-info';
-
+import styled from 'styled-components/native'
+const SText = styled.Text`
+  color: black;
+`
 export default () => {
   let navigate = useNavigate();
   const [showModalPolicies, setShowModalPolicies] = useState(false);
@@ -64,15 +67,15 @@ export default () => {
                 width: '100%',
               }}
             >
-              <TouchableHighlight onPress={() => setShowModalStats(false)}>
+              <TouchableOpacity onPress={() => setShowModalStats(false)}>
                 <Image
                   source={require('./close-icon.webp')}
                   style={{ width: 30, height: 30 }}
                 />
-              </TouchableHighlight>
+              </TouchableOpacity>
             </View>
-            <Text>Total notes sent: {}</Text>
-            <Text>Total notes recieved: {}</Text>
+            <SText>Total notes sent: {}</SText>
+            <SText>Total notes recieved: {}</SText>
           </View>
         </View>
       </Modal>
@@ -96,14 +99,16 @@ export default () => {
                 width: '100%',
               }}
             >
-              <TouchableHighlight onPress={() => setShowModalPolicies(false)}>
+              <TouchableOpacity onPress={() => setShowModalPolicies(false)}>
                 <Image
                   source={require('./close-icon.webp')}
                   style={{ width: 30, height: 30 }}
                 />
-              </TouchableHighlight>
+              </TouchableOpacity>
             </View>
-            <Text>HERE WILL APPEAR THE POLICIES</Text>
+            <SText>HERE WILL APPEAR THE POLICIES</SText>
+            <SText>Privacy policy: https://www.termsfeed.com/live/0fadf9d7-dbd6-4448-bc02-330714e73c9a</SText>
+            <SText>Terms and conditions: https://www.termsfeed.com/live/0ffef729-ee77-41c4-97cd-2c522389e833</SText>
           </View>
         </View>
       </Modal>
@@ -127,14 +132,14 @@ export default () => {
                 width: '100%',
               }}
             >
-              <TouchableHighlight onPress={() => setShowModalFeedback(false)}>
+              <TouchableOpacity onPress={() => setShowModalFeedback(false)}>
                 <Image
                   source={require('./close-icon.webp')}
                   style={{ width: 30, height: 30 }}
                 />
-              </TouchableHighlight>
+              </TouchableOpacity>
             </View>
-            <Text>HERE WILL APPEAR THE FEEDBACK FORM</Text>
+            <SText>HERE WILL APPEAR THE FEEDBACK FORM</SText>
           </View>
         </View>
       </Modal>
@@ -146,7 +151,7 @@ export default () => {
           backgroundColor: '#FFE2E2',
         }}
       >
-        <TouchableHighlight
+        <TouchableOpacity
           onPress={() => navigate('/')}
           title="Save"
           color="#841584"
@@ -156,9 +161,9 @@ export default () => {
             style={{ width: 40, height: 40 }}
             source={require('./back.webp')}
           />
-        </TouchableHighlight>
-        <Text style={{ alignSelf: 'center', fontWeight: '500' }}>SETTINGS</Text>
-        <TouchableHighlight
+        </TouchableOpacity>
+        <SText style={{ alignSelf: 'center', fontWeight: '500' }}>SETTINGS</SText>
+        <TouchableOpacity
           onPress={() => navigate('/canva')}
           title="New"
           color="#841584"
@@ -168,33 +173,33 @@ export default () => {
             style={{ width: 21, height: 21, margin: 10 }}
             source={require('./create-icon.webp')}
           />
-        </TouchableHighlight>
+        </TouchableOpacity>
       </View>
       <View style={{ display: 'flex' }}>
-        {/* <TouchableHighlight
+        {/* <TouchableOpacity
           onPress={() => setShowModalStats(true)}
           style={{borderBottomWidth: 1, padding: 15}}>
-          <Text>Stats 📈</Text>
-        </TouchableHighlight>
-        <TouchableHighlight
+          <SText>Stats 📈</SText>
+        </TouchableOpacity>
+        <TouchableOpacity
           onPress={() => setShowModalFeedback(true)}
           style={{borderBottomWidth: 1, padding: 15}}>
-          <Text>Send feedback 😄</Text>
-        </TouchableHighlight> */}
-        <TouchableHighlight
+          <SText>Send feedback 😄</SText>
+        </TouchableOpacity> */}
+        <TouchableOpacity
           onPress={() => setShowModalPolicies(true)}
           style={{ borderBottomWidth: 1, padding: 15 }}
         >
-          <Text>Policies 🧑🏻‍⚖️</Text>
-        </TouchableHighlight>
-        <TouchableHighlight
+          <SText>Policies 🧑🏻‍⚖️</SText>
+        </TouchableOpacity>
+        <TouchableOpacity
           onPress={unlink}
           style={{ borderBottomWidth: 1, padding: 15 }}
         >
-          <Text style={{ color: 'red', fontWeight: 'bold' }}>
+          <SText style={{ color: 'red', fontWeight: 'bold' }}>
             Unlink partner 🚷
-          </Text>
-        </TouchableHighlight>
+          </SText>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );

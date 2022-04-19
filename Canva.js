@@ -5,7 +5,7 @@ import {
   StyleSheet,
   View,
   Text,
-  TouchableHighlight,
+  TouchableOpacity,
   Image,
   SafeAreaView,
   Alert,
@@ -27,15 +27,19 @@ import {
 import ViewShot from 'react-native-view-shot';
 import {SvgXml} from 'react-native-svg';
 import { UserContext } from './context'
+import styled from 'styled-components/native'
+const SText = styled.Text`
+  color: black;
+`
 var RNFS = require('react-native-fs');
 
 export default () => {
   let navigate = useNavigate();
-  const { mobileData, _ } = useContext(UserContext)
+  const { mobileData, loading } = useContext(UserContext)
   
   const [actualDraw, setActualDraw] = useState([]);
   const [text, onChangeText] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [cacheLoading, setCacheLoading] = useState(true);
   const [color, setColor] = useState(DEFAULT_COLORS[0][0][0]);
   const [thickness, setThickness] = useState(5);
   const [opacity, setOpacity] = useState(1);
@@ -54,7 +58,7 @@ export default () => {
     ]).then(([value1, value2]) => {
       setActualDraw(value1 != null ? JSON.parse(value1) : null);
       onChangeText(value2);
-      setLoading(false);
+      setCacheLoading(false);
     });
   }, []);
 
@@ -136,6 +140,7 @@ export default () => {
               .push()
               .set(infoToSave)
             // Save to him recieved notes
+            console.info(333, mobileData.linkedWith)
             database()
               .ref(`/${mobileData.linkedWith}/recievedNotes`)
               .push()
@@ -160,8 +165,8 @@ export default () => {
     );
   };
 
-  if (loading) {
-    return <SafeAreaView><Text>Loading...</Text></SafeAreaView>
+  if (loading || cacheLoading) {
+    return <SafeAreaView><SText>Loading...</SText></SafeAreaView>
   }
 
   return (
@@ -172,7 +177,7 @@ export default () => {
         visible={modalImage !== null}>
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <Text style={styles.modalText}>Sending...</Text>
+            <SText style={styles.modalText}>Sending...</SText>
             <ViewShot
               ref={shotRef}
               style={{backgroundColor: 'white'}}
@@ -191,7 +196,7 @@ export default () => {
             alignItems: 'center',
             backgroundColor: '#FFE2E2',
           }}>
-          <TouchableHighlight
+          <TouchableOpacity
             onPress={() => navigate('/')}
             title="Save"
             color="#841584"
@@ -200,9 +205,9 @@ export default () => {
               style={{width: 40, height: 40}}
               source={require('./back.webp')}
             />
-          </TouchableHighlight>
-          <Text style={{alignSelf: 'center', fontWeight: '500'}}>CREATION</Text>
-          <TouchableHighlight
+          </TouchableOpacity>
+          <SText style={{alignSelf: 'center', fontWeight: '500'}}>CREATION</SText>
+          <TouchableOpacity
             onPress={sendData}
             title="New"
             color="#841584"
@@ -215,9 +220,9 @@ export default () => {
                 justifyContent: 'flex-end',
                 margin: 10,
               }}>
-              <Text>Send</Text>
+              <SText>Send</SText>
             </View>
-          </TouchableHighlight>
+          </TouchableOpacity>
         </View>
         <View
           style={{
